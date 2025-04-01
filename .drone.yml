@@ -12,6 +12,9 @@ volumes:
   - name: docker-socket
     host:
       path: /var/run/docker.sock  # 挂载宿主机的 Docker Socket
+  - name: ssh-cache
+    host:
+      path: /home/asialjim/.ssh
 
 steps:
   # ------------------------------
@@ -22,6 +25,8 @@ steps:
     volumes:
       - name: docker-socket
         path: /var/run/docker.sock
+      - name: ssh-cache
+        path: /root/.ssh
     commands:
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
