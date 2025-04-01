@@ -21,7 +21,7 @@ steps:
   # 阶段 1：启动所有服务（直接调用 docker-compose）
   # ------------------------------
   - name: deploy-with-compose
-    image: docker/compose:1.29.2  # 使用 docker-compose 官方镜像
+    image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
     volumes:
       - name: docker-socket
         path: /var/run/docker.sock
