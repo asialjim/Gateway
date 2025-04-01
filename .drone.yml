@@ -17,33 +17,18 @@ volumes:
       path: /home/asialjim/.ssh
 
 steps:
-#  - name: build-start
-#    image: drone/drone-runner-ssh # SSH工具镜像
-#    settings:
-#      host:
-#        from_secret: ssh_host # 从 secret 中读取宿主机ip地址
-#      username:
-#        from_secret: ssh_username # 从Secret中读取SSH用户名
-#      password:
-#        from_secret: ssh_password # 从Secret中读取SSH密码
-#      port: 22 # 远程连接端口
-#      command_timeout: 5m # 远程执行命令超时时间
-#      script:
-#        - cd /home/asialjim/.DroneImage/maven/build # 进入宿主机构建目录
-#        - chmod +x run.sh # 更改为可执行脚本
-#        - ./run.sh # 运行脚本打包应用镜像并运行
-#        -
-  # ------------------------------
-  # 阶段 1：启动所有服务（直接调用 docker-compose）
-  # ------------------------------
-  - name: deploy-with-compose
-    image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
+  - name: build-start
+    image: drone/drone-runner-ssh # SSH工具镜像
     pull: never
-    volumes:
-      - name: docker-socket
-        path: /var/run/docker.sock
-      - name: ssh-cache
-        path: /root/.ssh
+    settings:
+      host:
+        from_secret: ssh_host # 从 secret 中读取宿主机ip地址
+      username:
+        from_secret: ssh_username # 从Secret中读取SSH用户名
+      password:
+        from_secret: ssh_password # 从Secret中读取SSH密码
+      port: 22 # 远程连接端口
+      command_timeout: 5m # 远程执行命令超时时间
     commands:
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
@@ -51,6 +36,24 @@ steps:
       # 启动服务（强制重建镜像）
       - docker-compose down
       - docker-compose up -d --build --force-recreate
+  # ------------------------------
+  # 阶段 1：启动所有服务（直接调用 docker-compose）
+  # ------------------------------
+#  - name: deploy-with-compose
+#    image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
+#    pull: never
+#    volumes:
+#      - name: docker-socket
+#        path: /var/run/docker.sock
+#      - name: ssh-cache
+#        path: /root/.ssh
+#    commands:
+#      - cp -r ./* /app
+#      # 切换到项目目录（假设代码库已克隆到 /app）
+#      - cd /app
+#      # 启动服务（强制重建镜像）
+#      - docker-compose down
+#      - docker-compose up -d --build --force-recreate
 #    environment:
       # 传递 Nacos 认证信息（如果注册服务时需要）
 #      NACOS_USERNAME:
