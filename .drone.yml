@@ -1,4 +1,5 @@
 kind: pipeline
+type: docker # 定义流水线类型，还有kubernetes、exec、ssh等类型
 name: api-six-deploy
 
 
