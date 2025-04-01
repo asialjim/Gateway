@@ -1,0 +1,13 @@
+discovery:
+  nacos:
+    host:                          # Nacos 服务端地址（必填）
+      - "http://nacos:8848"        # 单节点部署地址
+    prefix: "/nacos/v1/"           # Nacos API 前缀（默认值）
+    fetch_interval: 30             # 服务实例列表拉取间隔（秒，默认30）‌
+    username: "nacos"              # 可选：Nacos 认证账号（若开启鉴权）
+    password: "nacos"              # 可选：Nacos 认证密码
+    timeout:
+      connect: 2000                # 连接超时时间（毫秒，默认2000）
+      send: 2000                   # 发送请求超时时间（默认2000）
+      read: 5000                   # 读取响应超时时间（默认5000）‌
+    weight: 100                    # 服务实例默认权重（默认100）‌

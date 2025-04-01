@@ -1,0 +1,53 @@
+version: '3.8'
+services:
+  apisix:
+    image: apache/apisix:3.9.0-debian
+    container_name: api-six
+    volumes:
+      - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml
+      - ./apisix/nacos_discovery.yaml:/usr/local/apisix/conf/nacos_discovery.yaml
+    ports:
+      - "9080:9080"  # 数据面
+      - "9180:9180"  # 控制面
+    networks:
+      app_net:
+        ipv4_address: 172.30.0.5
+    depends_on:
+      - nacos
+
+  apisix-dashboard:
+    image: apache/apisix-dashboard:3.0.1-alpine
+    container_name: api-six-dashboard
+    ports:
+      - "9000:9000"
+    environment:
+      - APISIX_ADMIN_KEY=edd1c9f034335f136f87ad84b625c8f1
+      - APISIX_ADMIN_LISTEN_ADDRESS=0.0.0.0
+      - APISIX_ADMIN_LISTEN_PORT=9180
+    networks:
+      app_net:
+        ipv4_address: 172.30.0.6
+    depends_on:
+      - api-six
+
+  api-six-health:
+    image: python:3.9
+    container_name: api-six-health
+    volumes:
+      - ./service:/app
+    working_dir: /app
+    command: python health.py
+    environment:
+      - NACOS_SERVER=nacos:8848
+      - NACOS_USERNAME=nacos   # 新增：Nacos 用户名
+      - NACOS_PASSWORD=nacos   # 新增：Nacos 密码
+    networks:
+      app_net:
+        ipv4_address: 172.30.0.7
+    depends_on:
+      - nacos
+
+networks:
+  app_net:
+    external: true  # 关键修改点：声明使用外部网络
+    name: app_net   # 显式指定网络名称
