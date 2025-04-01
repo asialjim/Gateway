@@ -17,11 +17,28 @@ volumes:
       path: /home/asialjim/.ssh
 
 steps:
+#  - name: build-start
+#    image: drone/drone-runner-ssh # SSH工具镜像
+#    settings:
+#      host:
+#        from_secret: ssh_host # 从 secret 中读取宿主机ip地址
+#      username:
+#        from_secret: ssh_username # 从Secret中读取SSH用户名
+#      password:
+#        from_secret: ssh_password # 从Secret中读取SSH密码
+#      port: 22 # 远程连接端口
+#      command_timeout: 5m # 远程执行命令超时时间
+#      script:
+#        - cd /home/asialjim/.DroneImage/maven/build # 进入宿主机构建目录
+#        - chmod +x run.sh # 更改为可执行脚本
+#        - ./run.sh # 运行脚本打包应用镜像并运行
+#        -
   # ------------------------------
   # 阶段 1：启动所有服务（直接调用 docker-compose）
   # ------------------------------
   - name: deploy-with-compose
     image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
+    pull: never
     volumes:
       - name: docker-socket
         path: /var/run/docker.sock
