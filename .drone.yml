@@ -1,20 +1,7 @@
 kind: pipeline
-type: ssh
+type: docker
 name: api-six-deploy
 
-# 触发条件：main 分支推送时执行
-trigger:
-  branch:
-    - main
-
-# 使用 Docker-in-Docker 环境
-volumes:
-  - name: docker-socket
-    host:
-      path: /var/run/docker.sock  # 挂载宿主机的 Docker Socket
-  - name: ssh-cache
-    host:
-      path: /home/asialjim/.ssh
 
 steps:
   - name: build-start
@@ -81,3 +68,12 @@ steps:
 #    when:
 #      status:
 #        - success
+# 使用 Docker-in-Docker 环境
+
+volumes:
+  - name: docker-socket
+    host:
+      path: /var/run/docker.sock  # 挂载宿主机的 Docker Socket
+  - name: ssh-cache
+    host:
+      path: /home/asialjim/.ssh
