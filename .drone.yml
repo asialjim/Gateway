@@ -21,7 +21,6 @@ steps:
       - docker-compose down
       - docker-compose up -d --build --force-recreate
 
-
 volumes:
   - name: docker-socket
     host:
