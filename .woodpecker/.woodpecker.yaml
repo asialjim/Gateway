@@ -13,4 +13,3 @@ steps:
     commands:
       - echo "Testing ..."
       - ./executable
-#      -
