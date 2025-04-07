@@ -1,0 +1,77 @@
+kind: pipeline
+name: api-six-deploy
+
+
+steps:
+  - name: build-start
+    image: drone/drone-runner-ssh:lasted # SSH工具镜像
+    pull: never
+    settings:
+      host:
+        from_secret: ssh_host # 从 secret 中读取宿主机ip地址
+      username:
+        from_secret: ssh_username # 从Secret中读取SSH用户名
+      password:
+        from_secret: ssh_password # 从Secret中读取SSH密码
+      port: 22 # 远程连接端口
+    commands:
+      - cp -r ./* /app
+      # 切换到项目目录（假设代码库已克隆到 /app）
+      - cd /app
+      # 启动服务（强制重建镜像）
+      - docker-compose down
+      - docker-compose up -d --build --force-recreate
+  # ------------------------------
+  # 阶段 1：启动所有服务（直接调用 docker-compose）
+  # ------------------------------
+#  - name: deploy-with-compose
+#    image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
+#    pull: never
+#    volumes:
+#      - name: docker-socket
+#        path: /var/run/docker.sock
+#      - name: ssh-cache
+#        path: /root/.ssh
+#    commands:
+#      - cp -r ./* /app
+#      # 切换到项目目录（假设代码库已克隆到 /app）
+#      - cd /app
+#      # 启动服务（强制重建镜像）
+#      - docker-compose down
+#      - docker-compose up -d --build --force-recreate
+#    environment:
+      # 传递 Nacos 认证信息（如果注册服务时需要）
+#      NACOS_USERNAME:
+#        from_secret: NACOS_USERNAME
+#      NACOS_PASSWORD:
+#        from_secret: NACOS_PASSWORD
+
+# ------------------------------
+# 配置缓存（加速构建）
+# ------------------------------
+#caches:
+#  - /app/service  # 缓存健康检查服务代码目录
+#  # ------------------------------
+#  # 通知（可选）
+#  # ------------------------------
+#  - name: notify-slack
+#    image: plugins/slack
+#    settings:
+#      webhook:
+#        from_secret: SLACK_WEBHOOK
+#      template: >
+#        Deployment Succeeded!
+#        Commit: {{ build.commit }}
+#        Author: {{ build.author }}
+#    when:
+#      status:
+#        - success
+# 使用 Docker-in-Docker 环境
+
+volumes:
+  - name: docker-socket
+    host:
+      path: /var/run/docker.sock  # 挂载宿主机的 Docker Socket
+  - name: ssh-cache
+    host:
+      path: /home/asialjim/.ssh
