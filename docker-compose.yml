@@ -12,8 +12,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.40.0.8
-    depends_on:
-      - nacos
+#    depends_on:
+#      - nacos
 
   api-six-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
@@ -38,14 +38,14 @@ services:
     working_dir: /app
     command: python health.py
     environment:
-      - NACOS_SERVER=nacos:8848
+      - NACOS_SERVER=172.40.0.5:8848
       - NACOS_USERNAME=nacos   # 新增：Nacos 用户名
       - NACOS_PASSWORD=nacos   # 新增：Nacos 密码
     networks:
       app_net:
         ipv4_address: 172.40.0.10
-    depends_on:
-      - nacos
+#    depends_on:
+#      - nacos
 
 networks:
   app_net:
