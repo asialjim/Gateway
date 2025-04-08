@@ -11,7 +11,7 @@ services:
       - "9180:9180"  # 控制面
     networks:
       app_net:
-        ipv4_address: 172.30.0.5
+        ipv4_address: 172.30.0.8
 
   apisix-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
@@ -24,7 +24,7 @@ services:
       - APISIX_ADMIN_LISTEN_PORT=9180
     networks:
       app_net:
-        ipv4_address: 172.30.0.6
+        ipv4_address: 172.30.0.9
     depends_on:
       - api-six
 
@@ -41,11 +41,11 @@ services:
       - NACOS_PASSWORD=nacos   # 新增：Nacos 密码
     networks:
       app_net:
-        ipv4_address: 172.30.0.7
+        ipv4_address: 172.30.0.10
     depends_on:
       - nacos
 
 networks:
   app_net:
     external: true  # 关键修改点：声明使用外部网络
-    name: app_net   # 显式指定网络名称
+    name: dvelopment_development-net   # 显式指定网络名称
