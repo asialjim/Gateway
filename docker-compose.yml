@@ -12,8 +12,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.30.0.8
-    depends_on:
-      - nacos
+#    depends_on:
+#      - nacos
 
   apisix-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
@@ -44,8 +44,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.30.0.10
-    depends_on:
-      - nacos
+#    depends_on:
+#      - nacos
 
 networks:
   app_net:
