@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  apisix:
+  api-six:
     image: apache/apisix:3.9.0-debian
     container_name: api-six
     volumes:
@@ -15,7 +15,7 @@ services:
 #    depends_on:
 #      - nacos
 
-  apisix-dashboard:
+  api-six-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
     container_name: api-six-dashboard
     ports:
