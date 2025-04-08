@@ -2,7 +2,6 @@ kind: pipeline
 type: docker
 name: api-six-deploy
 
-
 steps:
   - name: deploy-with-compose
     image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
@@ -12,7 +11,8 @@ steps:
         path: /var/run/docker.sock
       - name: ssh-cache
         path: /root/.ssh
-      - /vol2/1000/docker/api/gateway:/app
+      - name: app-cache
+        path: /app
     commands:
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
@@ -35,3 +35,6 @@ volumes:
   - name: ssh-cache
     host:
       path: /home/asialjim/.ssh
+  - name: app-cache
+    host:
+      path: /vol2/1000/docker/api/gateway:/app
