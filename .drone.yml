@@ -16,6 +16,7 @@ steps:
         from_secret: ssh_password # 从Secret中读取SSH密码
       port: 22 # 远程连接端口
     commands:
+      - mkdir /app
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
       - cd /app
