@@ -11,7 +11,7 @@ services:
       - "9180:9180"  # 控制面
     networks:
       app_net:
-        ipv4_address: 172.30.0.8
+        ipv4_address: 172.40.0.8
 #    depends_on:
 #      - nacos
 
@@ -26,7 +26,7 @@ services:
       - APISIX_ADMIN_LISTEN_PORT=9180
     networks:
       app_net:
-        ipv4_address: 172.30.0.9
+        ipv4_address: 172.40.0.9
     depends_on:
       - api-six
 
@@ -43,7 +43,7 @@ services:
       - NACOS_PASSWORD=nacos   # 新增：Nacos 密码
     networks:
       app_net:
-        ipv4_address: 172.30.0.10
+        ipv4_address: 172.40.0.10
 #    depends_on:
 #      - nacos
 
