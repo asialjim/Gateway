@@ -39,6 +39,7 @@ steps:
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
       - cd /app
+      - ls -la
       # 启动服务（强制重建镜像）
       - docker-compose down
       - docker-compose up -d --build --force-recreate
