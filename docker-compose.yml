@@ -5,16 +5,15 @@ services:
     container_name: api-six
     volumes:
       - /vol2/1000/docker/api/gateway:/app
-      - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml
-      - ./apisix/nacos_discovery.yaml:/usr/local/apisix/conf/nacos_discovery.yaml
+      - /vol2/1000/docker/api/gateway/apisix:/usr/local/apisix/conf
     ports:
       - "9080:9080"  # 数据面
       - "9180:9180"  # 控制面
     networks:
       app_net:
         ipv4_address: 172.40.0.8
-#    depends_on:
-#      - nacos
+    depends_on:
+      - nacos
 
   api-six-dashboard:
     image: apache/apisix-dashboard:3.0.1-alpine
@@ -45,8 +44,8 @@ services:
     networks:
       app_net:
         ipv4_address: 172.40.0.10
-#    depends_on:
-#      - nacos
+    depends_on:
+      - nacos
 
 networks:
   app_net:

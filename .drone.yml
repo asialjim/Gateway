@@ -15,6 +15,7 @@ steps:
       - name: app-cache
         path: /app
     commands:
+      - rm -rf /app/*
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
       - cd /app
