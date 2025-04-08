@@ -4,28 +4,6 @@ name: api-six-deploy
 
 
 steps:
-#  - name: build-start
-#    image: drone/drone-runner-ssh:latest # SSH工具镜像
-#    pull: never
-#    settings:
-#      host:
-#        from_secret: ssh_host # 从 secret 中读取宿主机ip地址
-#      username:
-#        from_secret: ssh_username # 从Secret中读取SSH用户名
-#      password:
-#        from_secret: ssh_password # 从Secret中读取SSH密码
-#      port: 22 # 远程连接端口
-#    commands:
-#      - mkdir /app
-#      - cp -r ./* /app
-#       切换到项目目录（假设代码库已克隆到 /app）
-#      - cd /app
-#       启动服务（强制重建镜像）
-#      - docker-compose down
-#      - docker-compose up -d --build --force-recreate
-#   ------------------------------
-  # 阶段 1：启动所有服务（直接调用 docker-compose）
-  # ------------------------------
   - name: deploy-with-compose
     image: docker/compose:debian-1.29.2  # 使用 docker-compose 官方镜像
     pull: never
@@ -34,9 +12,8 @@ steps:
         path: /var/run/docker.sock
       - name: ssh-cache
         path: /root/.ssh
-      - /home/asialjim/.docker/api/gateway:/app
+      - /vol2/1000/docker/api/gateway:/app
     commands:
-      - mkdir /app
       - cp -r ./* /app
       # 切换到项目目录（假设代码库已克隆到 /app）
       - cd /app
