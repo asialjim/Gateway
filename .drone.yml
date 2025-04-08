@@ -5,7 +5,7 @@ name: api-six-deploy
 
 steps:
   - name: build-start
-    image: drone/drone-runner-ssh:lasted # SSH工具镜像
+    image: drone/drone-runner-ssh:latest # SSH工具镜像
     pull: never
     settings:
       host:
