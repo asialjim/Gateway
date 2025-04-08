@@ -34,6 +34,7 @@ steps:
         path: /var/run/docker.sock
       - name: ssh-cache
         path: /root/.ssh
+      - /vol2/1000/docker/app/gateway:/app
     commands:
       - mkdir /app
       - cp -r ./* /app

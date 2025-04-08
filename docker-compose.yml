@@ -4,6 +4,7 @@ services:
     image: apache/apisix:3.9.0-debian
     container_name: api-six
     volumes:
+      - /vol2/1000/docker/app/gateway:/app
       - ./apisix/config.yaml:/usr/local/apisix/conf/config.yaml
       - ./apisix/nacos_discovery.yaml:/usr/local/apisix/conf/nacos_discovery.yaml
     ports:
@@ -34,7 +35,8 @@ services:
     image: python:3.9
     container_name: api-six-health
     volumes:
-      - ./service:/app
+      - /vol2/1000/docker/app/gateway/service:/app
+#      - ./service:/app
     working_dir: /app
     command: python health.py
     environment:
