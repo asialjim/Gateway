@@ -19,7 +19,7 @@ services:
     image: apache/apisix-dashboard:3.0.1-alpine
     container_name: api-six-dashboard
     ports:
-      - "9000:9000"
+      - "19000:9000"
     environment:
       - APISIX_ADMIN_KEY=edd1c9f034335f136f87ad84b625c8f1
       - APISIX_ADMIN_LISTEN_ADDRESS=0.0.0.0
