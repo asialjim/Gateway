@@ -1,0 +1,52 @@
+
+knife4j:
+  gateway:
+    # 是否开启
+    enabled: true
+    # 排序规则(tag/operation排序自4.2.0版本新增)
+    # 取值：alpha-默认排序规则，官方swagger-ui默认实现,order-Knife4j提供的增强排序规则，开发者可扩展x-order，根据数值来自定义排序
+    tags-sorter: order
+    operations-sorter: order
+    # 指定服务发现的模式聚合微服务文档，并且是默认`default`分组
+    strategy: discover
+    # 服务发现模式的配置
+    discover:
+      enabled: true
+      version: openapi3
+      excluded-services:
+        - GatewayApplication
+      oas3:
+        url: /v3/api-docs?group=default
+        validator-url:
+        oauth2-redirect-url:
+#      service-config:
+#        demo-service:
+#          order: 0
+#          group-name: "订单"
+#          context-path: /
+#          group-names:
+#            - 组1
+#            - 组2
+
+server:
+  port: ${gateway_port:10000}
+spring:
+  application:
+    name: GatewayApplication
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${nacos_server:'http://192.168.101.200:8848'}
+        namespace: ${nacos_namespace:public}
+        username: ${nacos_username:nacos}
+        password: ${nacos_password:nacos}
+        group: ${nacos_group:DEFAULT_GROUP}
+    loadbalancer:
+      retry:
+        backoff:
+          enabled: true
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
