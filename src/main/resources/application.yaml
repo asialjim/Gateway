@@ -13,8 +13,8 @@ knife4j:
     discover:
       enabled: true
       version: openapi3
-      excluded-services:
-        - GatewayApplication
+#      excluded-services:
+#        - GatewayApplication
       oas3:
         url: /v3/api-docs?group=default
         validator-url:
