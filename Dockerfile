@@ -2,12 +2,13 @@
 FROM openjdk:8
 # 设置端口
 EXPOSE 10000
-RUN pwd
-RUN ls -la
+
 # 创建工作区目录
 RUN mkdir -p /app
 # 指定工作区
 WORKDIR /app
+RUN pwd
+RUN ls -la
 # 复制操作
 COPY ./start.sh /app
 # 复制可执行jar包
