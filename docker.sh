@@ -1,8 +1,8 @@
 #!/bin/sh
 # 定义应用组名
-group_name='asialjim/mams'
+group_name='asialjim'
 # 定义应用名称 ,这里的name是获取你仓库的名称，也可以自己写
-app_name='gateway'
+app_name='mams-gateway'
 docker_name='asialjim_mams_gateway'
 # 定义应用版本
 app_version='latest'
