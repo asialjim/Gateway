@@ -3,19 +3,18 @@ FROM openjdk:8
 # 设置端口
 EXPOSE 10000
 
-# 创建工作区目录
-RUN mkdir -p /app
 # 指定工作区
-WORKDIR /app
+WORKDIR /app/build
+RUN cd /app/build
 RUN pwd
 RUN ls -la
 # 复制操作
-COPY ./start.sh /app
+COPY ./start.sh /app/build
 # 复制可执行jar包
-COPY ./*.jar /app
-ADD Gateway.jar /app/app.jar
+COPY ./*.jar /app/build
+ADD Gateway.jar /app/build/app.jar
 # 赋予执行权限
-RUN chmod 755 -R /app
+RUN chmod 755 -R /app/build
 # 设置
-ENTRYPOINT ["java", "-jar","/app/app.jar"]
+ENTRYPOINT ["java", "-jar","/app/build/app.jar"]
 MAINTAINER AsialJim
