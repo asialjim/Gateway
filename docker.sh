@@ -1,6 +1,6 @@
 #!/bin/sh
 # 定义应用组名
-group_name='asialjim:mams'
+group_name='asialjim@mams'
 # 定义应用名称 ,这里的name是获取你仓库的名称，也可以自己写
 app_name='gateway'
 # 定义应用版本
