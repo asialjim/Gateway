@@ -15,8 +15,15 @@
 ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+        <relativePath/>
+    </parent>
 
     <groupId>com.asialjim.microapplet</groupId>
     <artifactId>gateway</artifactId>
@@ -191,180 +198,6 @@
     <build>
         <!--发布到maven 中央仓库-->
         <plugins>
-            <plugin>
-                <groupId>org.sonatype.central</groupId>
-                <artifactId>central-publishing-maven-plugin</artifactId>
-                <version>0.7.0</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <publishingServerId>ossrh</publishingServerId>
-                    <autoPublish>true</autoPublish>
-                    <deploymentName>MAMS</deploymentName>
-                    <ignorePublishedComponents>true</ignorePublishedComponents>
-                    <waitUntil>validated</waitUntil>
-                </configuration>
-            </plugin>
-
-
-            <!-- 版本发布核心插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <releaseProfiles>release</releaseProfiles>
-                    <!-- 允许插件传递命令行参数 -->
-                    <!--suppress MavenModelInspection, MybatisXMapperXmlInspection, UnresolvedMavenProperty -->
-                    <arguments>-DasialjimVersion=${asialjimVersion}</arguments>
-                    <!-- 正式版本号 -->
-                    <!--suppress MavenModelInspection, MybatisXMapperXmlInspection, UnresolvedMavenProperty -->
-                    <releaseVersion>${releaseVersion}</releaseVersion>
-                    <!-- 下一个开发版本号 -->
-                    <!--suppress MavenModelInspection, MybatisXMapperXmlInspection, UnresolvedMavenProperty -->
-                    <developmentVersion>${developmentVersion}</developmentVersion>
-                    <goals>deploy</goals>
-                    <!-- 强制更新所有依赖版本 -->
-                    <preparationGoals>
-                        clean
-                        versions:use-releases
-                        versions:update-parent
-                        verify
-                    </preparationGoals>
-                </configuration>
-            </plugin>
-
-            <!-- 版本号管理增强插件 -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.16.2</version>
-                <configuration>
-                    <generateBackupPoms>false</generateBackupPoms>
-                    <processProperties>true</processProperties>
-                    <processDependencyManagement>true</processDependencyManagement>
-                    <processDependencies>true</processDependencies>
-                    <processParent>true</processParent>
-                    <processAllModules>true</processAllModules>
-                    <allowSnapshots>false</allowSnapshots> <!-- 发布阶段禁止SNAPSHOT -->
-                </configuration>
-                <executions>
-                    <!-- 强制更新父版本和子模块 -->
-                    <execution>
-                        <id>pre-release-update</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>update-parent</goal>
-                            <goal>update-child-modules</goal>
-                        </goals>
-                    </execution>
-                    <!-- 发布后更新到下一个SNAPSHOT版本 -->
-                    <execution>
-                        <id>post-release-update</id>
-                        <!--suppress MybatisXMapperXmlInspection, MybatisPlusMapperXmlInspection, MavenModelInspection -->
-                        <phase>post-release</phase>
-                        <goals>
-                            <goal>update-parent</goal>
-                            <goal>update-child-modules</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- 用于执行单元测试的核心插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
-                <configuration>
-                    <!-- 执行 mvn package 时跳过单元测试 -->
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-
-            <!-- 打 source 包 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--   支持在资源文件中使用 ${property} 占位符，构建时自动替换为 POM 文件中定义的属性值，实现配置与代码分离‌ -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.6.3</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <encoding>UTF-8</encoding> <!-- 关键配置 -->
-                    <docencoding>UTF-8</docencoding>
-                    <additionalJOptions>
-                        <additionalJOption>-Xdoclint:none</additionalJOption>
-                    </additionalJOptions>
-                </configuration>
-            </plugin>
-
-
-            <!-- 签名 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <version>3.2.7</version>
-                <executions>
-                    <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>sign</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-                    <!-- 编译工具 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgument>-parameters</compilerArgument>
-                </configuration>
-            </plugin>
-
-            <!-- 部署插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
-            </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
