@@ -38,20 +38,8 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
     commands:
       # 定义在Docker容器中执行的shell命令
       - cd /app/build
-      - ls -la
       - chmod +x *.sh
       - sh docker.sh
-    environment:
-      nacos_server:
-        from_secret: nacos-server
-      nacos_namespace:
-        from_secret: nacos-namespace
-      nacos_username:
-        from_secret: nacos-username
-      nacos_password:
-        from_secret: nacos-password
-      nacos_group:
-        from_secret: nacos-group
 
 volumes: # 定义流水线挂载目录，用于共享数据
   - name: maven-cache
