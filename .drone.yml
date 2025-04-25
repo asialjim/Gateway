@@ -40,7 +40,6 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
       - cd /app/build
       - chmod +x *.sh
       - sh docker.sh
-      - docker ps
     environment:
       nacos_server:
         from_secret: nacos-server
