@@ -10,9 +10,10 @@ WORKDIR /app/build
 #COPY ./start.sh /app/build
 # 复制可执行jar包
 #COPY ./*.jar /app/build
-RUN mv /app/build/Gateway.jar /app/build/app.jar
+RUN ls -la
+#RUN mv /app/build/Gateway.jar /app/build/app.jar
 # 赋予执行权限
 RUN chmod 755 -R /app/build
 # 设置
-ENTRYPOINT ["java", "-jar","/app/build/app.jar"]
+ENTRYPOINT ["java", "-jar","/app/build/Gateway.jar"]
 MAINTAINER AsialJim
