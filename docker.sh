@@ -22,6 +22,7 @@ docker build -t ${group_name}/${app_name}:${app_version} .
 
 echo '----启动新镜像----'
 docker run -p 10000:10000 --name ${docker_name} \
+--cpus="4" --memory="1024m" \
 --env-file /root/.env/mams.env \
 -e 'spring.profiles.active'=${profile_active} \
 -e TZ="Asia/Shanghai" \
