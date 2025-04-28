@@ -21,7 +21,7 @@ echo '----构建新镜像----'
 docker build -t ${group_name}/${app_name}:${app_version} .
 
 echo '----启动新镜像----'
-docker run -p 10000:10000 --name ${docker_name} \
+docker run --name ${docker_name} \
 --network api_development-net \
 --ip 172.40.0.6 \
 --cpus="4" --memory="1024m" \
