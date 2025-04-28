@@ -1,5 +1,5 @@
 #指定基础镜像
-FROM openjdk:8
+FROM openjdk:8u121-jre-alpine
 EXPOSE 10000
 COPY ./*.jar /
 # 赋予执行权限
