@@ -12,9 +12,13 @@ knife4j:
         url: /v3/api-docs?group=default
         validator-url:
         oauth2-redirect-url:
+    basic:
+      enable: on
+      username: gateway
+      password: gateway
 
 server:
-  port: ${gateway_port:10000}
+  port: ${gateway_port:80}
 
 spring:
   application:
