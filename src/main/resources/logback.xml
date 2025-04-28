@@ -18,7 +18,7 @@
     <appender name="consoleLog" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %d{yy-MM-dd HH:mm:ss.SSS} %X{REQUEST_ID} %-5p- %m \t\t\t %-22c %n
+                %d{yy-MM-dd HH:mm:ss.SSS} %-5p- %m \t\t\t %X{REQUEST_ID} %-22c %n
             </pattern>
         </encoder>
     </appender>
