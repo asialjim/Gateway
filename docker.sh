@@ -8,19 +8,16 @@ docker_name='aj-mams-gateway'
 app_version='latest'
 # 定义应用环境
 profile_active='prod'
-echo '----停止原容器----'
+echo '...'
+echo '发布网关开始...'
 docker stop ${docker_name}
 
-echo '----删除原容器----'
 docker rm ${docker_name}
 
-echo '----删除原镜像----'
 docker rmi ${group_name}/${app_name}:${app_version}
 
-echo '----构建新镜像----'
 docker build -t ${group_name}/${app_name}:${app_version} .
 
-echo '----启动新镜像----'
 docker run --name ${docker_name} \
 --network api \
 --ip 172.100.0.100 \
@@ -33,4 +30,4 @@ docker run --name ${docker_name} \
 -d ${group_name}/${app_name}:${app_version}
 
 
-echo '----镜像启动完毕----'
+echo '发布网关结束...'
