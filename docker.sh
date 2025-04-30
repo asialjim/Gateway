@@ -22,8 +22,8 @@ docker build -t ${group_name}/${app_name}:${app_version} .
 
 echo '----启动新镜像----'
 docker run --name ${docker_name} \
---network api_development-net \
---ip 172.40.0.6 \
+--network api \
+--ip 172.100.0.100 \
 --cpus="4" --memory="1024m" \
 --env-file /root/.env/mams.env \
 -e 'spring.profiles.active'=${profile_active} \
