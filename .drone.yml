@@ -16,7 +16,7 @@ steps: # 定义流水线执行步骤，这些步骤将顺序执行
         path: /root/.ssh
     commands: # 定义在Docker容器中执行的shell命令
       # 开始打包maven工程
-      - mvn clean package -Dmaven.test.skip=true
+      - mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -Dmaven.resources.skip=true
       - cp target/GatewayApplication.jar /app/build/Application.jar
       - cp *.sh /app/build
       - cp Dockerfile /app/build/Dockerfile
