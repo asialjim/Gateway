@@ -17,9 +17,9 @@ import java.util.Random;
 @RequestMapping
 public class IndexController {
 
-    @GetMapping("/index")
+    @GetMapping({"/index","/"})
     public String index(){
-        return "网关门面:";
+        return "Welcome to MAMS Gateway";
     }
 
     @GetMapping("/balance")
