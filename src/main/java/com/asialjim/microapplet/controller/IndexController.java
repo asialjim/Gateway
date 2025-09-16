@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
+
 /**
  * 健康检查
  *
@@ -15,8 +17,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping
 public class IndexController {
 
-    @GetMapping("/index")
+    @GetMapping({"/index","/"})
     public String index(){
-        return "Index";
+        return "Welcome to MAMS Gateway";
+    }
+
+    @GetMapping("/balance")
+    public String balance(){
+        return "模拟余额："  + new Random().nextDouble() * 100 + "元";
+    }
+
+    @GetMapping("/creditCard")
+    public String creditCard(){
+        return "模拟信用卡账单:" + new Random().nextDouble() * 100 + "元";
+    }
+
+    @GetMapping("/store")
+    public String store(){
+        return "请上传位置:";
     }
 }

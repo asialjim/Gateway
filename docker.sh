@@ -1,27 +1,43 @@
 #!/bin/sh
+#
+#  Copyright 2014-2025 <a href="mailto:asialjim@qq.com">Asial Jim</a>
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
 # 定义应用组名
 group_name='asialjim'
 # 定义应用名称 ,这里的name是获取你仓库的名称，也可以自己写
 app_name='mams-gateway'
-docker_name='asialjim_mams_gateway'
+docker_name='aj-mams-gateway'
 # 定义应用版本
 app_version='latest'
 # 定义应用环境
 profile_active='prod'
-echo '----停止原容器----'
+echo '...'
+echo '发布网关开始...'
 docker stop ${docker_name}
 
-echo '----删除原容器----'
 docker rm ${docker_name}
 
-echo '----删除原镜像----'
 docker rmi ${group_name}/${app_name}:${app_version}
 
-echo '----构建新镜像----'
 docker build -t ${group_name}/${app_name}:${app_version} .
 
-echo '----启动新镜像----'
-docker run -p 10000:10000 --name ${docker_name} \
+docker run --name ${docker_name} \
+--network api \
+--ip 172.100.0.100 \
+--cpus="2" --memory="1g" \
 --env-file /root/.env/mams.env \
 -e 'spring.profiles.active'=${profile_active} \
 -e TZ="Asia/Shanghai" \
@@ -30,4 +46,4 @@ docker run -p 10000:10000 --name ${docker_name} \
 -d ${group_name}/${app_name}:${app_version}
 
 
-echo '----镜像启动完毕----'
+echo '发布网关结束...'
