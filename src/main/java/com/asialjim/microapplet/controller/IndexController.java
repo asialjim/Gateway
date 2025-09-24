@@ -21,19 +21,4 @@ public class IndexController {
     public String index(){
         return "Welcome to MAMS Gateway";
     }
-
-    @GetMapping("/balance")
-    public String balance(){
-        return "模拟余额："  + new Random().nextDouble() * 100 + "元";
-    }
-
-    @GetMapping("/creditCard")
-    public String creditCard(){
-        return "模拟信用卡账单:" + new Random().nextDouble() * 100 + "元";
-    }
-
-    @GetMapping("/store")
-    public String store(){
-        return "请上传位置:";
-    }
 }
