@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.filter.auth;
+package com.asialjim.microapplet.filter;
 
 import com.asialjim.microapplet.cloud.AuthServiceLoadBalancerConfig;
 import com.asialjim.microapplet.common.cons.Headers;
@@ -25,7 +25,7 @@ import com.asialjim.microapplet.common.context.Result;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.utils.JsonUtil;
 import com.asialjim.microapplet.config.AuthServerProperty;
-import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -37,7 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -55,16 +54,15 @@ import java.util.Objects;
  * @since 2025/9/24, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Slf4j
-@Component
+@AllArgsConstructor
 public class AuthFilter implements GatewayFilter, Ordered {
-    @Resource
     private AuthServerProperty authServerProperty;
-    @Resource
     private WebClient.Builder webClientBuilder;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        ServerHttpResponse response = exchange.getResponse();
 
         // 提取令牌
         String token = extractToken(request);
@@ -85,7 +83,8 @@ public class AuthFilter implements GatewayFilter, Ordered {
                             .mutate()
                             .header(Headers.CURRENT_SESSION, JsonUtil.instance.toStr(session))
                             .build();
-                    return chain.filter(exchange.mutate().request(targetRequest).build());
+                    response.getHeaders().set(Headers.SessionId, session.getId());
+                    return chain.filter(exchange.mutate().request(targetRequest).response(response).build());
                 })
                 .onErrorResume(e -> unauthorizedResponse(exchange, Res.UserAuthFailure401, "认证服务不可用"));
     }
@@ -109,7 +108,7 @@ public class AuthFilter implements GatewayFilter, Ordered {
         return webClientBuilder.build()
                 .get()
                 .uri(this.authServerProperty.authUrl(token))
-                .header(Headers.CLIENT_TYPE,Headers.CLOUD_CLIENT)
+                .header(Headers.CLIENT_TYPE, Headers.CLOUD_CLIENT)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, AuthServiceLoadBalancerConfig.rsExFunction())
                 .bodyToMono(MamsSession.class);

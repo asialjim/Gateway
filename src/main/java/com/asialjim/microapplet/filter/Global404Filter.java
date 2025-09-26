@@ -18,14 +18,20 @@ package com.asialjim.microapplet.filter;
 
 import com.asialjim.microapplet.common.context.Result;
 import com.asialjim.microapplet.common.utils.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * 动态路由过滤，未配置的路由返回404
@@ -34,25 +40,29 @@ import reactor.core.publisher.Mono;
  * @version 1.0
  * @since 2025年9月24日, &nbsp;&nbsp; <em>version:1.0</em>
  */
-@Component
+@Slf4j
 public class Global404Filter implements GatewayFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // 关键：检查GATEWAY_ROUTE_ATTR属性，如果请求已被路由，该属性会被设置
         // 如果此属性为null，说明没有任何路由配置匹配当前请求
-        if (exchange.getAttribute(org.springframework.cloud.gateway.support.ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR) == null) {
-            exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
-            exchange.getResponse().getHeaders().add("Content-Type", "application/json");
-
-            // 构建404响应体
-            Result<String> res = new Result<String>().setStatus(404).setThr(true).setCode("Page Not Found").setMsg("Page Not Found").setData("Page Not Found");
-            byte[] bytes = JsonUtil.instance.toStr(res).getBytes(java.nio.charset.StandardCharsets.UTF_8);
-            org.springframework.core.io.buffer.DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
-            return exchange.getResponse().writeWith(Mono.just(buffer));
-        }
+        if (exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR) == null)
+            return response404(exchange);
 
         // 如果请求已被路由，继续执行过滤器链
         return chain.filter(exchange);
+    }
+
+    public static Mono<Void> response404(ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.NOT_FOUND);
+        response.getHeaders().add("Content-Type", "application/json");
+
+        // 构建404响应体
+        Result<String> res = new Result<String>().setStatus(404).setThr(true).setCode("PAGE:NOT:FOUND").setMsg("资源不存在").setData("Page Not Found");
+        byte[] bytes = JsonUtil.instance.toStr(res).getBytes(StandardCharsets.UTF_8);
+        DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+        return exchange.getResponse().writeWith(Mono.just(buffer));
     }
 
     @Override

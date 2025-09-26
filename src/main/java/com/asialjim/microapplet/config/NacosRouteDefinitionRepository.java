@@ -1,0 +1,207 @@
+/*
+ *    Copyright 2014-2025 <a href="mailto:asialjim@qq.com">Asial Jim</a>
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+package com.asialjim.microapplet.config;
+
+import com.asialjim.microapplet.common.utils.JsonUtil;
+import com.asialjim.microapplet.route.RouteConfigProperty;
+import com.asialjim.microapplet.route.RouteNode;
+import jakarta.annotation.Resource;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
+import org.springframework.cloud.gateway.filter.FilterDefinition;
+import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
+import org.springframework.cloud.gateway.route.RouteDefinition;
+import org.springframework.cloud.gateway.route.RouteDefinitionRepository;
+import org.springframework.context.*;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 基于 nacos 的动态路由策略仓库
+ *
+ * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
+ * @version 1.0
+ * @since 2025/9/25, &nbsp;&nbsp; <em>version:1.0</em>
+ */
+@Slf4j
+@RefreshScope
+@Configuration
+public class NacosRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
+    private final Map<String, RouteDefinition> routeDefinitionMap = new ConcurrentHashMap<>();
+    @Resource
+    private RouteConfigProperty routeConfigProperty;
+    @Setter
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    private boolean initialized = false;
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationEvent() {
+        if (initialized)
+            return;
+        // 当应用完全准备就绪后，才加载路由
+        log.info("应用准备就绪，开始初始化路由配置...");
+        refreshRoutes(this.routeConfigProperty);
+        initialized = true;
+    }
+
+    @Override
+    public Mono<Void> save(Mono<RouteDefinition> route) {
+        return route.doOnNext(routeDefinition -> {
+            routeDefinitionMap.put(routeDefinition.getId(), routeDefinition);
+            log.info("保存路由定义: {}", routeDefinition.getId());
+        }).then();
+    }
+
+    @Override
+    public Mono<Void> delete(Mono<String> routeId) {
+        return routeId.doOnNext(id -> {
+            routeDefinitionMap.remove(id);
+            log.info("删除路由定义: {}", id);
+        }).then();
+    }
+
+    @Override
+    public Flux<RouteDefinition> getRouteDefinitions() {
+        return Flux.fromIterable(routeDefinitionMap.values())
+                .doOnSubscribe(subscription -> log.debug("获取路由定义列表"));
+    }
+
+    /**
+     * 刷新路由配置
+     */
+    public void refreshRoutes(RouteConfigProperty routeConfigProperty) {
+        log.info("开始刷新路由配置...");
+
+        // 清空现有路由
+        routeDefinitionMap.clear();
+        List<RouteNode> routes = routeConfigProperty.getRoutes();
+        if (CollectionUtils.isNotEmpty(routes)) {
+            // 转换配置为RouteDefinition
+            for (RouteNode routeNode : routes) {
+                RouteDefinition routeDefinition = convertToRouteDefinition(routeNode);
+                routeDefinitionMap.put(routeDefinition.getId(), routeDefinition);
+                addRouteLog(routeDefinition);
+            }
+        }
+        RouteDefinition route404 = route404();
+        addRouteLog(route404);
+        routeDefinitionMap.put("PAGE-NOT-FOUND", route404);
+
+        // 发布路由刷新事件
+        Optional.ofNullable(this.applicationEventPublisher)
+                .ifPresent(publisher -> {
+                    publisher.publishEvent(new RefreshRoutesEvent(this));
+                    log.info("路由刷新完成，当前路由数量: {}", routeDefinitionMap.size());
+                });
+    }
+
+    private void addRouteLog(RouteDefinition route) {
+        if (Objects.isNull(route))
+            return;
+        log.info("加载路由: {}, Predicates: {}, URI: {}, Filters: {}",
+                route.getId(),
+                JsonUtil.instance.toStr(route.getPredicates()),
+                route.getUri(),
+                JsonUtil.instance.toStr(route.getFilters()));
+    }
+
+    private RouteDefinition route404() {
+        RouteDefinition definition = new RouteDefinition();
+        definition.setId("PAGE-NOT-FOUND");
+
+        final PredicateDefinition predicate = new PredicateDefinition();
+        predicate.setName("Path");
+        predicate.addArg("pattern", "/**");
+
+        definition.setPredicates(Collections.singletonList(predicate));
+
+        definition.setUri(URI.create("http://no-loop"));
+
+        // 设置Filters
+        List<FilterDefinition> filters = new ArrayList<>();
+        FilterDefinition TraceFilter = new FilterDefinition();
+        TraceFilter.setName("TraceFilter");
+        filters.add(TraceFilter);
+
+        FilterDefinition PageNotFoundFilter = new FilterDefinition();
+        PageNotFoundFilter.setName("PageNotFoundFilter");
+        filters.add(PageNotFoundFilter);
+
+        definition.setFilters(filters);
+        return definition;
+
+    }
+
+    /**
+     * 将RouteNode转换为RouteDefinition
+     */
+    private RouteDefinition convertToRouteDefinition(RouteNode routeNode) {
+        RouteDefinition definition = new RouteDefinition();
+        definition.setId(routeNode.getName());
+        definition.setUri(URI.create("lb://" + routeNode.getService()));
+
+        // 设置Predicate
+        boolean enableAuth = routeNode.enableAuth();
+        String path = (enableAuth ? "/api/rest/" : "/api/open/") + routeNode.getPath() + "/**";
+
+        PredicateDefinition predicate = new PredicateDefinition();
+        predicate.setName("Path");
+        predicate.addArg("pattern", path);
+
+        definition.setPredicates(Collections.singletonList(predicate));
+
+        // 设置Filters
+        final List<FilterDefinition> filters = new ArrayList<>();
+        FilterDefinition TraceFilter = new FilterDefinition();
+        TraceFilter.setName("TraceFilter");
+        filters.add(TraceFilter);
+
+        // StripPrefix Filter
+        FilterDefinition stripPrefixFilter = new FilterDefinition();
+        stripPrefixFilter.setName("StripPrefix");
+        stripPrefixFilter.addArg("parts", "2");
+        filters.add(stripPrefixFilter);
+
+        // RewritePath Filter
+        FilterDefinition rewritePathFilter = new FilterDefinition();
+        rewritePathFilter.setName("RewritePath");
+        rewritePathFilter.addArg("regexp", "/" + routeNode.getPath() + "(?<segment>.*)");
+        rewritePathFilter.addArg("replacement", "${segment}");
+        filters.add(rewritePathFilter);
+
+        // 添加全局过滤器（通过配置方式）
+        if (enableAuth) {
+            FilterDefinition authFilter = new FilterDefinition();
+            authFilter.setName("AuthFilter");
+            filters.add(authFilter);
+        }
+
+        definition.setFilters(filters);
+        return definition;
+    }
+}

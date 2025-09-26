@@ -17,7 +17,9 @@
 package com.asialjim.microapplet.route;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.Serial;
@@ -32,12 +34,14 @@ import java.util.List;
  * @since 2025/9/24, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Data
+@Slf4j
+@RefreshScope
 @Configuration
 @ConfigurationProperties(prefix = "gateway")
 public class RouteConfigProperty implements Serializable {
-
     @Serial
     private static final long serialVersionUID = 2700758991173138326L;
+
 
     private List<RouteNode> routes;
 }

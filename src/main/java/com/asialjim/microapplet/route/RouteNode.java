@@ -16,7 +16,9 @@
 
 package com.asialjim.microapplet.route;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,6 +32,7 @@ import java.util.Optional;
  * @since 2025/9/24, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Data
+@Accessors(chain = true)
 public class RouteNode implements Serializable {
     @Serial
     private static final long serialVersionUID = -8047150685067998552L;
@@ -46,7 +49,9 @@ public class RouteNode implements Serializable {
     /**
      * 是否需要登录
      */
+    @JsonAlias("enable-auth")
     private Boolean enableAuth;
+
     /**
      * 路由服务
      */

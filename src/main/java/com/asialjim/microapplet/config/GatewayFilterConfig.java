@@ -16,34 +16,39 @@
 
 package com.asialjim.microapplet.config;
 
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.asialjim.microapplet.filter.Global404Filter;
+import com.asialjim.microapplet.filter.AuthFilter;
+import com.asialjim.microapplet.filter.GlobalTraceFilter;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.Serial;
-import java.io.Serializable;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * 用户认证服务器信息
+ * 网关过滤器配置
  *
  * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
  * @version 1.0
- * @since 2025/9/24, &nbsp;&nbsp; <em>version:1.0</em>
+ * @since 2025/9/25, &nbsp;&nbsp; <em>version:1.0</em>
  */
-@Data
-@RefreshScope
 @Configuration
-@ConfigurationProperties(prefix = "feign.domain.user")
-public class AuthServerProperty implements Serializable {
-    @Serial
-    private static final long serialVersionUID = -899675679406861833L;
-    private String auth;
-    private String authPath;
+public class GatewayFilterConfig {
 
-    public String authUrl(String token) {
-        String path = (StringUtils.startsWith(authPath, "/") ? StringUtils.EMPTY : "/") + authPath;
-        return String.format("lb://%s%s?token=%s", auth, path, token);
+    @Bean
+    public GatewayFilter authFilter(AuthServerProperty authServerProperty,
+                                    WebClient.Builder webClientBuilder) {
+
+        return new AuthFilter(authServerProperty, webClientBuilder);
+    }
+
+    @Bean
+    public GatewayFilter globalTraceFilter() {
+        return new GlobalTraceFilter();
+    }
+
+    @Bean
+    public GatewayFilter global404Filter() {
+        return new Global404Filter();
     }
 }
