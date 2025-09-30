@@ -18,12 +18,16 @@ package com.asialjim.microapplet.cloud;
 
 import com.asialjim.microapplet.common.exception.RsEx;
 import com.asialjim.microapplet.common.utils.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -43,11 +47,12 @@ public class AuthServiceLoadBalancerConfig {
     public static Function<ClientResponse, Mono<? extends Throwable>> rsExFunction() {
         return clientResponse -> {
             HttpHeaders httpHeaders = clientResponse.headers().asHttpHeaders();
-            boolean throwable = Boolean.parseBoolean(httpHeaders.getFirst(X_RES_THROWABLE));
-            String code = httpHeaders.getFirst(X_RES_CODE);
-            String msg = httpHeaders.getFirst(X_RES_MSG);
-            List<Object> errs = JsonUtil.instance.toList(httpHeaders.getFirst(X_RES_ERRS), Object.class);
-            int status = NumberUtils.toInt(httpHeaders.getFirst(X_RES_STATUS), clientResponse.statusCode().value());
+            boolean throwable = Boolean.parseBoolean(firstValue(X_RES_THROWABLE,httpHeaders));
+            String code = firstValue(X_RES_CODE,httpHeaders);
+            String msg = firstValue(X_RES_MSG, httpHeaders);
+            String errorJson = firstValue(X_RES_ERRS,httpHeaders);
+            List<String> errs = StringUtils.isBlank(errorJson) ? Collections.emptyList(): JsonUtil.instance.toList(errorJson, String.class);
+            int status = NumberUtils.toInt(firstValue(X_RES_STATUS,httpHeaders), clientResponse.statusCode().value());
             // 处理错误状态码，例如 401, 403 等
             return Mono.error(
                     new RsEx()
@@ -58,5 +63,12 @@ public class AuthServiceLoadBalancerConfig {
                             .setErrs(errs)
             );
         };
+    }
+
+    private static String firstValue(String key , HttpHeaders httpHeaders){
+        String value = httpHeaders.getFirst(key);
+        if (StringUtils.isBlank(value))
+            return StringUtils.EMPTY;
+        return URLDecoder.decode(value, StandardCharsets.UTF_8);
     }
 }

@@ -22,11 +22,13 @@ import com.asialjim.microapplet.common.cons.WebCons;
 import com.asialjim.microapplet.common.context.Res;
 import com.asialjim.microapplet.common.context.ResCode;
 import com.asialjim.microapplet.common.context.Result;
+import com.asialjim.microapplet.common.exception.RsEx;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.utils.JsonUtil;
 import com.asialjim.microapplet.config.AuthServerProperty;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -44,6 +46,7 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -86,7 +89,11 @@ public class AuthFilter implements GatewayFilter, Ordered {
                     response.getHeaders().set(Headers.SessionId, session.getId());
                     return chain.filter(exchange.mutate().request(targetRequest).response(response).build());
                 })
-                .onErrorResume(e -> unauthorizedResponse(exchange, Res.UserAuthFailure401, "认证服务不可用"));
+                .onErrorResume(e -> {
+                    if (e instanceof RsEx rsEx)
+                        return unauthorizedResponse(exchange, rsEx);
+                    return unauthorizedResponse(exchange, Res.UserAuthFailure401, "认证服务不可用");
+                });
     }
 
     private String extractToken(ServerHttpRequest request) {
@@ -105,7 +112,8 @@ public class AuthFilter implements GatewayFilter, Ordered {
     }
 
     private Mono<MamsSession> session(String token) {
-        return webClientBuilder.build()
+        return webClientBuilder
+                .build()
                 .get()
                 .uri(this.authServerProperty.authUrl(token))
                 .header(Headers.CLIENT_TYPE, Headers.CLOUD_CLIENT)
@@ -114,12 +122,18 @@ public class AuthFilter implements GatewayFilter, Ordered {
                 .bodyToMono(MamsSession.class);
     }
 
-    private Mono<Void> unauthorizedResponse(ServerWebExchange exchange, ResCode resCode, Object... errs) {
+    private Mono<Void> unauthorizedResponse(ServerWebExchange exchange, ResCode resCode, String... errs) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
 
-        Result<Object> result = resCode.resultErrs(Arrays.asList(errs));
+        Result<Object> result = resCode.result();
+        if (ArrayUtils.isNotEmpty(errs)) {
+            List<String> errs1 = result.getErrs();
+            errs1.addAll(Arrays.asList(errs));
+            result.setErrs(errs1);
+        }
+
         String json = JsonUtil.instance.toStr(result);
 
         byte[] bits = json.getBytes(StandardCharsets.UTF_8);

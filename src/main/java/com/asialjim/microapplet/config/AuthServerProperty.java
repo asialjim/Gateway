@@ -18,6 +18,7 @@ package com.asialjim.microapplet.config;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
@@ -35,11 +36,13 @@ import java.io.Serializable;
 @Data
 @RefreshScope
 @Configuration
-@ConfigurationProperties(prefix = "feign.domain.user")
+@ConfigurationProperties(prefix = "feign.auth.user")
 public class AuthServerProperty implements Serializable {
     @Serial
     private static final long serialVersionUID = -899675679406861833L;
+//    @Value("${feign.auth.user.auth}")
     private String auth;
+//    @Value("${feign.auth.user.auth-path}")
     private String authPath;
 
     public String authUrl(String token) {
