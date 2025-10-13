@@ -20,8 +20,6 @@ import com.asialjim.microapplet.filter.Global404Filter;
 import com.asialjim.microapplet.filter.AuthFilter;
 import com.asialjim.microapplet.filter.GlobalTraceFilter;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -16,6 +16,7 @@
 
 package com.asialjim.microapplet.config;
 
+import com.alibaba.druid.util.StringUtils;
 import com.asialjim.microapplet.common.utils.JsonUtil;
 import com.asialjim.microapplet.route.RouteConfigProperty;
 import com.asialjim.microapplet.route.RouteNode;
@@ -23,6 +24,7 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.event.RefreshRoutesEvent;
@@ -38,7 +40,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于 nacos 的动态路由策略仓库
@@ -51,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RefreshScope
 @Configuration
 public class NacosRouteDefinitionRepository implements RouteDefinitionRepository, ApplicationEventPublisherAware {
-    private final Map<String, RouteDefinition> routeDefinitionMap = new ConcurrentHashMap<>();
+    private final List<RouteDefinition> routes = new Vector<>();
     @Resource
     private RouteConfigProperty routeConfigProperty;
     @Setter
@@ -63,7 +64,6 @@ public class NacosRouteDefinitionRepository implements RouteDefinitionRepository
     public void onApplicationEvent() {
         if (initialized)
             return;
-        // 当应用完全准备就绪后，才加载路由
         log.info("应用准备就绪，开始初始化路由配置...");
         refreshRoutes(this.routeConfigProperty);
         initialized = true;
@@ -71,24 +71,19 @@ public class NacosRouteDefinitionRepository implements RouteDefinitionRepository
 
     @Override
     public Mono<Void> save(Mono<RouteDefinition> route) {
-        return route.doOnNext(routeDefinition -> {
-            routeDefinitionMap.put(routeDefinition.getId(), routeDefinition);
-            log.info("保存路由定义: {}", routeDefinition.getId());
-        }).then();
+        return route.doOnNext(routes::add).doOnNext(item -> log.info("添加路由：{}", item.getId())).then();
     }
 
     @Override
     public Mono<Void> delete(Mono<String> routeId) {
-        return routeId.doOnNext(id -> {
-            routeDefinitionMap.remove(id);
-            log.info("删除路由定义: {}", id);
-        }).then();
+        return routeId.doOnNext(id -> routes.removeIf(item -> StringUtils.equals(id, item.getId())))
+                .doOnNext(id -> log.info("删除路由：{}", id))
+                .then();
     }
 
     @Override
     public Flux<RouteDefinition> getRouteDefinitions() {
-        return Flux.fromIterable(routeDefinitionMap.values())
-                .doOnSubscribe(subscription -> log.debug("获取路由定义列表"));
+        return Flux.fromIterable(routes).doOnSubscribe(subscription -> log.debug("获取路由定义列表"));
     }
 
     /**
@@ -98,49 +93,71 @@ public class NacosRouteDefinitionRepository implements RouteDefinitionRepository
         log.info("开始刷新路由配置...");
 
         // 清空现有路由
-        routeDefinitionMap.clear();
+        this.routes.clear();
+        final StringJoiner routeJ = new StringJoiner("\r\n\t————————————");
         List<RouteNode> routes = routeConfigProperty.getRoutes();
-        if (CollectionUtils.isNotEmpty(routes)) {
-            // 转换配置为RouteDefinition
-            for (RouteNode routeNode : routes) {
-                RouteDefinition routeDefinition = convertToRouteDefinition(routeNode);
-                routeDefinitionMap.put(routeDefinition.getId(), routeDefinition);
-                addRouteLog(routeDefinition);
-            }
-        }
-        RouteDefinition route404 = route404();
-        addRouteLog(route404);
-        routeDefinitionMap.put("PAGE-NOT-FOUND", route404);
+        routes.stream().map(this::convertToRouteDefinition).forEach(item -> addRoute(routeJ,item));
+        addRoute(routeJ, route404());
+        log.info("加载路由表{}", routeJ);
 
         // 发布路由刷新事件
         Optional.ofNullable(this.applicationEventPublisher)
                 .ifPresent(publisher -> {
                     publisher.publishEvent(new RefreshRoutesEvent(this));
-                    log.info("路由刷新完成，当前路由数量: {}", routeDefinitionMap.size());
+                    log.info("路由刷新完成，当前路由数量: {}", this.routes.size());
                 });
     }
 
-    private void addRouteLog(RouteDefinition route) {
+    private void addRoute(StringJoiner routeLog, RouteDefinition route) {
         if (Objects.isNull(route))
             return;
-        log.info("加载路由: {}, Predicates: {}, URI: {}, Filters: {}",
-                route.getId(),
-                JsonUtil.instance.toStr(route.getPredicates()),
-                route.getUri(),
-                JsonUtil.instance.toStr(route.getFilters()));
+
+        this.routes.add(route);
+        StringBuilder sb = new StringBuilder();
+        sb.append("\r\n\t").append("路由:").append("\t").append(route.getId());
+        StringJoiner predicateJ = new StringJoiner(";\t");
+        List<PredicateDefinition> predicates = route.getPredicates();
+        if (CollectionUtils.isNotEmpty(predicates)) {
+            for (PredicateDefinition predicate : predicates) {
+                String name = predicate.getName();
+                Map<String, String> args = predicate.getArgs();
+                if (MapUtils.isEmpty(args)) {
+                    predicateJ.add(name);
+                } else {
+                    predicateJ.add(name + ":" + JsonUtil.instance.toStr(args));
+                }
+            }
+            sb.append("\r\n\t").append("规则:").append("\t").append(predicateJ);
+        }
+
+        sb.append("\r\n\t").append("转发:").append("\t").append(route.getUri());
+        List<FilterDefinition> filters = route.getFilters();
+        StringJoiner filterJ = new StringJoiner(";\t");
+        if (CollectionUtils.isNotEmpty(filters)) {
+            for (FilterDefinition filter : filters) {
+                String name = filter.getName();
+                Map<String, String> args = filter.getArgs();
+                if (MapUtils.isEmpty(args)) {
+                    filterJ.add(name);
+                } else {
+                    filterJ.add(name + ":" + JsonUtil.instance.toStr(args));
+                }
+            }
+            sb.append("\r\n\t").append("拦截:").append("\t").append(filterJ);
+        }
+
+        routeLog.add(sb);
     }
 
     private RouteDefinition route404() {
         RouteDefinition definition = new RouteDefinition();
-        definition.setId("PAGE-NOT-FOUND");
+        definition.setId("PAGE404");
 
         final PredicateDefinition predicate = new PredicateDefinition();
         predicate.setName("Path");
         predicate.addArg("pattern", "/**");
-
         definition.setPredicates(Collections.singletonList(predicate));
-
-        definition.setUri(URI.create("http://no-loop"));
+        definition.setUri(URI.create("https://404.asialjim.cn/"));
 
         // 设置Filters
         List<FilterDefinition> filters = new ArrayList<>();

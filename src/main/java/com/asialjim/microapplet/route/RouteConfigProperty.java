@@ -24,7 +24,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 路由配置
@@ -44,4 +46,8 @@ public class RouteConfigProperty implements Serializable {
 
 
     private List<RouteNode> routes;
+
+    public List<RouteNode> getRoutes() {
+        return Optional.ofNullable(this.routes).orElseGet(Collections::emptyList);
+    }
 }
