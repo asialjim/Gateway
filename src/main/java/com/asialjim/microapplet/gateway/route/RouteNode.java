@@ -14,40 +14,51 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.route;
+package com.asialjim.microapplet.gateway.route;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.Configuration;
+import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 /**
- * 路由配置
+ * 动态路由节点
  *
  * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
  * @version 1.0
  * @since 2025/9/24, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Data
-@Slf4j
-@RefreshScope
-@Configuration
-@ConfigurationProperties(prefix = "gateway")
-public class RouteConfigProperty implements Serializable {
+@Accessors(chain = true)
+public class RouteNode implements Serializable {
     @Serial
-    private static final long serialVersionUID = 2700758991173138326L;
+    private static final long serialVersionUID = -8047150685067998552L;
+
+    /**
+     * 路由名称
+     */
+    private String name;
+    /**
+     * 匹配规则, 仅基于path
+     */
+    private String path;
+    
+    /**
+     * 是否需要登录
+     */
+    @JsonAlias("enable-auth")
+    private Boolean enableAuth;
+
+    /**
+     * 路由服务
+     */
+    private String service;
 
 
-    private List<RouteNode> routes;
-
-    public List<RouteNode> getRoutes() {
-        return Optional.ofNullable(this.routes).orElseGet(Collections::emptyList);
+    public boolean enableAuth(){
+        return Optional.ofNullable(this.enableAuth).orElse(true);
     }
 }

@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.filter;
+package com.asialjim.microapplet.gateway.filter;
 
 import com.asialjim.microapplet.common.cons.Headers;
 import lombok.extern.slf4j.Slf4j;

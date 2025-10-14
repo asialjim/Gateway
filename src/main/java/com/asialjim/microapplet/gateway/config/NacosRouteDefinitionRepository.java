@@ -14,12 +14,12 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.config;
+package com.asialjim.microapplet.gateway.config;
 
 import com.alibaba.druid.util.StringUtils;
 import com.asialjim.microapplet.common.utils.JsonUtil;
-import com.asialjim.microapplet.route.RouteConfigProperty;
-import com.asialjim.microapplet.route.RouteNode;
+import com.asialjim.microapplet.gateway.route.RouteConfigProperty;
+import com.asialjim.microapplet.gateway.route.RouteNode;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

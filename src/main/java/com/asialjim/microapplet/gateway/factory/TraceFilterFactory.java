@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.factory;
+package com.asialjim.microapplet.gateway.factory;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -24,24 +24,25 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 用户认证过滤器工厂
+ * 链路追踪工厂
  *
  * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
  * @version 1.0
  * @since 2025/9/25, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Configuration
-public class AuthFilterFactory extends AbstractGatewayFilterFactory<AuthFilterFactory.Config> {
-    private final GatewayFilter authFilter;
+public class TraceFilterFactory extends AbstractGatewayFilterFactory<TraceFilterFactory.Config> {
 
-    public AuthFilterFactory(GatewayFilter authFilter) {
+    private final GatewayFilter globalTraceFilter;
+
+    public TraceFilterFactory(GatewayFilter globalTraceFilter) {
         super(Config.class);
-        this.authFilter = authFilter;
+        this.globalTraceFilter = globalTraceFilter;
     }
 
     @Override
     public GatewayFilter apply(Config config) {
-        return authFilter;
+        return globalTraceFilter;
     }
 
     @Override
@@ -55,6 +56,6 @@ public class AuthFilterFactory extends AbstractGatewayFilterFactory<AuthFilterFa
 
     @Override
     public String name() {
-        return "AuthFilter";
+        return "TraceFilter";
     }
 }

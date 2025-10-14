@@ -14,11 +14,11 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.config;
+package com.asialjim.microapplet.gateway.config;
 
-import com.asialjim.microapplet.filter.Global404Filter;
-import com.asialjim.microapplet.filter.AuthFilter;
-import com.asialjim.microapplet.filter.GlobalTraceFilter;
+import com.asialjim.microapplet.gateway.filter.Global404Filter;
+import com.asialjim.microapplet.gateway.filter.AuthFilter;
+import com.asialjim.microapplet.gateway.filter.GlobalTraceFilter;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.context.annotation.Bean;

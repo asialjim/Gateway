@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.config;
+package com.asialjim.microapplet.gateway.config;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;

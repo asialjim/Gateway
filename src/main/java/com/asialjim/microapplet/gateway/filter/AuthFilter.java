@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.filter;
+package com.asialjim.microapplet.gateway.filter;
 
-import com.asialjim.microapplet.cloud.AuthServiceLoadBalancerConfig;
+import com.asialjim.microapplet.gateway.cloud.AuthServiceLoadBalancerConfig;
 import com.asialjim.microapplet.common.cons.Headers;
 import com.asialjim.microapplet.common.cons.WebCons;
 import com.asialjim.microapplet.common.context.Res;
@@ -25,7 +25,7 @@ import com.asialjim.microapplet.common.context.Result;
 import com.asialjim.microapplet.common.exception.RsEx;
 import com.asialjim.microapplet.common.security.MamsSession;
 import com.asialjim.microapplet.common.utils.JsonUtil;
-import com.asialjim.microapplet.config.AuthServerProperty;
+import com.asialjim.microapplet.gateway.config.AuthServerProperty;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;

@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.route;
+package com.asialjim.microapplet.gateway.route;
 
 import com.alibaba.cloud.nacos.NacosConfigManager;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.asialjim.microapplet.common.utils.JacksonUtil;
-import com.asialjim.microapplet.config.NacosRouteDefinitionRepository;
+import com.asialjim.microapplet.gateway.config.NacosRouteDefinitionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import jakarta.annotation.PostConstruct;

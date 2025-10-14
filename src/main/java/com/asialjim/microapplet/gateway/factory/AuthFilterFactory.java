@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package com.asialjim.microapplet.factory;
+package com.asialjim.microapplet.gateway.factory;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -24,25 +24,24 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 404 拦截工厂
+ * 用户认证过滤器工厂
  *
  * @author <a href="mailto:asialjim@hotmail.com">Asial Jim</a>
  * @version 1.0
  * @since 2025/9/25, &nbsp;&nbsp; <em>version:1.0</em>
  */
 @Configuration
-public class PageNotFoundFilterFactory extends AbstractGatewayFilterFactory<PageNotFoundFilterFactory.Config> {
+public class AuthFilterFactory extends AbstractGatewayFilterFactory<AuthFilterFactory.Config> {
+    private final GatewayFilter authFilter;
 
-    private final GatewayFilter global404Filter;
-
-    public PageNotFoundFilterFactory(GatewayFilter global404Filter) {
+    public AuthFilterFactory(GatewayFilter authFilter) {
         super(Config.class);
-        this.global404Filter = global404Filter;
+        this.authFilter = authFilter;
     }
 
     @Override
     public GatewayFilter apply(Config config) {
-        return global404Filter;
+        return authFilter;
     }
 
     @Override
@@ -56,6 +55,6 @@ public class PageNotFoundFilterFactory extends AbstractGatewayFilterFactory<Page
 
     @Override
     public String name() {
-        return "PageNotFoundFilter";
+        return "AuthFilter";
     }
 }
