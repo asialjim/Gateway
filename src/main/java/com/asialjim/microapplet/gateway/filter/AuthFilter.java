@@ -102,11 +102,16 @@ public class AuthFilter implements GatewayFilter, Ordered {
         if (StringUtils.isNotBlank(authHeader))
             return authHeader.replaceFirst(WebCons.BEARER_PREFIX, StringUtils.EMPTY);
 
+        authHeader = request.getHeaders().getFirst(Headers.USER_TOKEN);
+        if (StringUtils.isNotBlank(authHeader))
+            return authHeader.replaceFirst(WebCons.BEARER_PREFIX, StringUtils.EMPTY);
+
         // 从Cookie提取
         HttpCookie cookie = request.getCookies().getFirst(Headers.USER_TOKEN);
 
         if (Objects.nonNull(cookie))
             return cookie.getValue();
+
 
         return null;
     }
